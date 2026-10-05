@@ -1,0 +1,2446 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#6C63FF">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>SpeakUp - AI English Tutor</title>
+<style>
+  :root {
+    --primary: #6C63FF;
+    --primary-dark: #5a52d5;
+    --secondary: #FF6584;
+    --bg: #0f0f1a;
+    --bg2: #1a1a2e;
+    --bg3: #16213e;
+    --card: #1e1e35;
+    --card2: #252540;
+    --text: #e8e8f0;
+    --text2: #9999bb;
+    --text3: #6666aa;
+    --green: #4ade80;
+    --yellow: #fbbf24;
+    --red: #f87171;
+    --bubble-ai: #252545;
+    --bubble-user: #6C63FF;
+    --border: rgba(108,99,255,0.2);
+    --shadow: 0 8px 32px rgba(0,0,0,0.4);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    height: 100dvh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ── LOGIN ── */
+  #loginScreen {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100dvh;
+    padding: 24px;
+    background: linear-gradient(135deg, var(--bg) 0%, var(--bg3) 100%);
+  }
+  .login-logo {
+    font-size: 48px;
+    margin-bottom: 8px;
+  }
+  .login-title {
+    font-size: 28px;
+    font-weight: 800;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 4px;
+  }
+  .login-sub {
+    color: var(--text2);
+    font-size: 14px;
+    margin-bottom: 40px;
+    text-align: center;
+  }
+  .login-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    padding: 32px 28px;
+    width: 100%;
+    max-width: 400px;
+    box-shadow: var(--shadow);
+  }
+  .form-group {
+    margin-bottom: 16px;
+  }
+  .form-group label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text2);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-bottom: 8px;
+  }
+  .form-group input {
+    width: 100%;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 16px;
+    color: var(--text);
+    font-size: 16px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .form-group input:focus { border-color: var(--primary); }
+  .btn-primary {
+    width: 100%;
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    border: none;
+    border-radius: 14px;
+    padding: 16px;
+    color: #fff;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 8px;
+    transition: transform 0.1s, opacity 0.2s;
+  }
+  .btn-primary:active { transform: scale(0.98); opacity: 0.9; }
+  .error-msg {
+    color: var(--red);
+    font-size: 13px;
+    text-align: center;
+    margin-top: 12px;
+    min-height: 18px;
+  }
+
+  /* ── SETUP ── */
+  #setupScreen {
+    display: none;
+    flex-direction: column;
+    height: 100dvh;
+    overflow-y: auto;
+    padding: 24px;
+    background: linear-gradient(135deg, var(--bg) 0%, var(--bg3) 100%);
+  }
+  .setup-header {
+    text-align: center;
+    margin-bottom: 32px;
+    padding-top: 20px;
+  }
+  .setup-header h2 {
+    font-size: 24px;
+    font-weight: 800;
+    color: var(--text);
+    margin-bottom: 8px;
+  }
+  .setup-header p { color: var(--text2); font-size: 14px; }
+  .setup-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 24px;
+    margin-bottom: 16px;
+  }
+  .setup-card h3 {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--primary);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .option-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .option-btn {
+    background: var(--bg2);
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    padding: 12px 8px;
+    color: var(--text);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.2s;
+  }
+  .option-btn.selected {
+    border-color: var(--primary);
+    background: rgba(108,99,255,0.15);
+    color: var(--primary);
+    font-weight: 700;
+  }
+  .option-btn:active { transform: scale(0.97); }
+  .option-full { grid-column: 1 / -1; }
+  .interests-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
+  .interest-chip {
+    background: var(--bg2);
+    border: 2px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 6px;
+    color: var(--text2);
+    font-size: 12px;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.2s;
+  }
+  .interest-chip.selected {
+    border-color: var(--primary);
+    background: rgba(108,99,255,0.15);
+    color: var(--primary);
+    font-weight: 600;
+  }
+  .interest-chip span { display: block; font-size: 20px; margin-bottom: 4px; }
+
+  /* ── MAIN APP ── */
+  #app {
+    display: none;
+    flex-direction: column;
+    height: 100dvh;
+    overflow: hidden;
+  }
+
+  /* Header */
+  .app-header {
+    background: var(--bg2);
+    border-bottom: 1px solid var(--border);
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-shrink: 0;
+    padding-top: max(12px, env(safe-area-inset-top));
+  }
+  .header-avatar {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+  .header-info { flex: 1; min-width: 0; }
+  .header-name {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .header-status {
+    font-size: 11px;
+    color: var(--green);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .status-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--green);
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+  .header-actions { display: flex; gap: 8px; }
+  .header-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: var(--card);
+    border: 1px solid var(--border);
+    color: var(--text2);
+    font-size: 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+  }
+  .header-btn:active { background: var(--card2); }
+
+  /* Tabs */
+  .tabs {
+    display: flex;
+    background: var(--bg2);
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+  .tab {
+    flex: 1;
+    padding: 10px 4px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text3);
+    background: none;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    transition: color 0.2s;
+    border-bottom: 2px solid transparent;
+  }
+  .tab .tab-icon { font-size: 18px; }
+  .tab.active { color: var(--primary); border-bottom-color: var(--primary); }
+
+  /* Tab panels */
+  .tab-panel { display: none; flex: 1; overflow: hidden; flex-direction: column; }
+  .tab-panel.active { display: flex; }
+
+  /* ── CHAT PANEL ── */
+  #chatPanel { position: relative; }
+
+  .conversation-view {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    scroll-behavior: smooth;
+  }
+
+  .date-divider {
+    text-align: center;
+    font-size: 11px;
+    color: var(--text3);
+    background: var(--bg3);
+    padding: 4px 12px;
+    border-radius: 20px;
+    display: inline-block;
+    align-self: center;
+    margin: 8px 0;
+  }
+
+  .msg-row {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 2px;
+    max-width: 85%;
+  }
+  .msg-row.user { align-self: flex-end; align-items: flex-end; }
+  .msg-row.ai { align-self: flex-start; align-items: flex-start; }
+
+  .bubble {
+    padding: 10px 14px;
+    border-radius: 18px;
+    font-size: 15px;
+    line-height: 1.5;
+    position: relative;
+    word-break: break-word;
+  }
+  .msg-row.user .bubble {
+    background: var(--bubble-user);
+    color: #fff;
+    border-bottom-right-radius: 4px;
+  }
+  .msg-row.ai .bubble {
+    background: var(--bubble-ai);
+    color: var(--text);
+    border-bottom-left-radius: 4px;
+  }
+  .msg-time {
+    font-size: 10px;
+    color: var(--text3);
+    margin-top: 3px;
+    padding: 0 4px;
+  }
+
+  /* Correction bubble */
+  .correction-bubble {
+    background: rgba(251,191,36,0.1);
+    border: 1px solid rgba(251,191,36,0.3);
+    border-radius: 12px;
+    padding: 8px 12px;
+    font-size: 13px;
+    color: var(--yellow);
+    margin-top: 4px;
+    max-width: 85%;
+    align-self: flex-start;
+  }
+  .correction-bubble .correction-label {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--yellow);
+    margin-bottom: 4px;
+  }
+
+  /* Suggestion bubble */
+  .suggestion-bubble {
+    background: rgba(74,222,128,0.08);
+    border: 1px solid rgba(74,222,128,0.25);
+    border-radius: 12px;
+    padding: 8px 12px;
+    font-size: 13px;
+    color: var(--green);
+    margin-top: 4px;
+    max-width: 85%;
+    align-self: flex-start;
+  }
+  .suggestion-bubble .suggestion-label {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+  }
+
+  /* Typing indicator */
+  .typing-indicator {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 12px 16px;
+    background: var(--bubble-ai);
+    border-radius: 18px;
+    border-bottom-left-radius: 4px;
+    align-self: flex-start;
+    margin-bottom: 4px;
+  }
+  .typing-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--text3);
+    animation: typingBounce 1.2s infinite;
+  }
+  .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+  .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes typingBounce {
+    0%,60%,100% { transform: translateY(0); opacity: 0.4; }
+    30% { transform: translateY(-6px); opacity: 1; }
+  }
+
+  /* Voice & Input bar */
+  .input-bar {
+    background: var(--bg2);
+    border-top: 1px solid var(--border);
+    padding: 12px 16px;
+    padding-bottom: max(12px, env(safe-area-inset-bottom));
+    display: flex;
+    align-items: flex-end;
+    gap: 10px;
+    flex-shrink: 0;
+  }
+  .text-input-wrap {
+    flex: 1;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 22px;
+    display: flex;
+    align-items: flex-end;
+    padding: 6px 12px 6px 16px;
+    gap: 8px;
+    transition: border-color 0.2s;
+  }
+  .text-input-wrap:focus-within { border-color: var(--primary); }
+  #chatInput {
+    flex: 1;
+    background: none;
+    border: none;
+    outline: none;
+    color: var(--text);
+    font-size: 15px;
+    resize: none;
+    max-height: 100px;
+    line-height: 1.4;
+    padding: 6px 0;
+    font-family: inherit;
+  }
+  #chatInput::placeholder { color: var(--text3); }
+
+  .send-btn {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: var(--primary);
+    border: none;
+    color: #fff;
+    font-size: 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: transform 0.1s;
+    align-self: flex-end;
+  }
+  .send-btn:active { transform: scale(0.93); }
+
+  .mic-btn {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    border: none;
+    color: #fff;
+    font-size: 22px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.2s;
+    box-shadow: 0 4px 16px rgba(108,99,255,0.4);
+    position: relative;
+  }
+  .mic-btn.recording {
+    background: linear-gradient(135deg, var(--red), #c0392b);
+    box-shadow: 0 4px 24px rgba(248,113,113,0.5);
+    animation: micPulse 1s infinite;
+  }
+  @keyframes micPulse {
+    0%,100% { transform: scale(1); }
+    50% { transform: scale(1.08); }
+  }
+  .mic-btn.speaking {
+    background: linear-gradient(135deg, var(--green), #16a34a);
+    box-shadow: 0 4px 24px rgba(74,222,128,0.4);
+  }
+
+  /* AI Speaking waveform */
+  .ai-speaking-bar {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    padding: 8px 16px;
+    background: rgba(74,222,128,0.08);
+    border-top: 1px solid rgba(74,222,128,0.15);
+    flex-shrink: 0;
+  }
+  .ai-speaking-bar.active { display: flex; }
+  .wave-bar {
+    width: 4px;
+    background: var(--green);
+    border-radius: 2px;
+    animation: wave 1s infinite ease-in-out;
+  }
+  .wave-bar:nth-child(1){ height:8px; animation-delay:0s; }
+  .wave-bar:nth-child(2){ height:16px; animation-delay:0.1s; }
+  .wave-bar:nth-child(3){ height:24px; animation-delay:0.2s; }
+  .wave-bar:nth-child(4){ height:16px; animation-delay:0.3s; }
+  .wave-bar:nth-child(5){ height:8px; animation-delay:0.4s; }
+  .wave-bar:nth-child(6){ height:20px; animation-delay:0.15s; }
+  .wave-bar:nth-child(7){ height:12px; animation-delay:0.25s; }
+  @keyframes wave {
+    0%,100% { transform: scaleY(0.4); opacity:0.6; }
+    50% { transform: scaleY(1); opacity:1; }
+  }
+  .ai-speaking-text {
+    font-size: 12px;
+    color: var(--green);
+    font-weight: 600;
+    margin-left: 8px;
+  }
+  .stop-speak-btn {
+    background: none;
+    border: 1px solid rgba(74,222,128,0.3);
+    border-radius: 8px;
+    padding: 4px 10px;
+    color: var(--green);
+    font-size: 12px;
+    cursor: pointer;
+    margin-left: 8px;
+  }
+
+  /* ── VOCAB PANEL ── */
+  #vocabPanel {
+    overflow: hidden;
+  }
+  .vocab-header {
+    padding: 16px;
+    background: var(--bg2);
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+  .vocab-search-wrap {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+  .vocab-search {
+    flex: 1;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 10px 16px;
+    color: var(--text);
+    font-size: 14px;
+    outline: none;
+  }
+  .vocab-search:focus { border-color: var(--primary); }
+  .add-word-btn {
+    background: var(--primary);
+    border: none;
+    border-radius: 12px;
+    padding: 10px 16px;
+    color: #fff;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .vocab-stats {
+    display: flex;
+    gap: 16px;
+    margin-top: 12px;
+  }
+  .vocab-stat {
+    font-size: 12px;
+    color: var(--text2);
+  }
+  .vocab-stat strong { color: var(--primary); }
+  .vocab-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 12px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .vocab-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    transition: border-color 0.2s;
+  }
+  .vocab-card:active { border-color: var(--primary); }
+  .vocab-emoji { font-size: 22px; flex-shrink: 0; }
+  .vocab-info { flex: 1; min-width: 0; }
+  .vocab-word {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text);
+  }
+  .vocab-tr {
+    font-size: 13px;
+    color: var(--text2);
+    margin-top: 2px;
+  }
+  .vocab-example {
+    font-size: 12px;
+    color: var(--text3);
+    margin-top: 4px;
+    font-style: italic;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .vocab-badge {
+    font-size: 10px;
+    padding: 3px 8px;
+    border-radius: 20px;
+    font-weight: 600;
+    flex-shrink: 0;
+  }
+  .badge-new { background: rgba(108,99,255,0.2); color: var(--primary); }
+  .badge-learned { background: rgba(74,222,128,0.15); color: var(--green); }
+  .badge-practicing { background: rgba(251,191,36,0.15); color: var(--yellow); }
+  .vocab-delete {
+    background: none;
+    border: none;
+    color: var(--text3);
+    font-size: 16px;
+    cursor: pointer;
+    padding: 4px;
+  }
+  .empty-vocab {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--text3);
+  }
+  .empty-vocab .empty-icon { font-size: 48px; margin-bottom: 16px; }
+  .empty-vocab p { font-size: 14px; line-height: 1.6; }
+
+  /* ── PROGRESS PANEL ── */
+  #progressPanel {
+    overflow-y: auto;
+    padding: 16px;
+    gap: 12px;
+  }
+  .progress-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 20px;
+    margin-bottom: 12px;
+  }
+  .progress-card h3 {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text2);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .stat-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .stat-row:last-child { border-bottom: none; }
+  .stat-label { font-size: 14px; color: var(--text2); }
+  .stat-value { font-size: 16px; font-weight: 700; color: var(--text); }
+  .level-bar-wrap { margin-top: 8px; }
+  .level-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    color: var(--text2);
+    margin-bottom: 8px;
+  }
+  .level-bar-bg {
+    height: 8px;
+    background: var(--bg2);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .level-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--primary), var(--secondary));
+    border-radius: 4px;
+    transition: width 0.6s ease;
+  }
+  .streak-display {
+    text-align: center;
+    padding: 16px 0;
+  }
+  .streak-num {
+    font-size: 48px;
+    font-weight: 900;
+    background: linear-gradient(135deg, var(--yellow), #f97316);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .streak-label { font-size: 14px; color: var(--text2); margin-top: 4px; }
+  .achievement-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+  }
+  .achievement {
+    background: var(--bg2);
+    border-radius: 14px;
+    padding: 14px 8px;
+    text-align: center;
+    border: 1px solid var(--border);
+  }
+  .achievement.unlocked { border-color: rgba(251,191,36,0.4); background: rgba(251,191,36,0.08); }
+  .achievement-icon { font-size: 28px; margin-bottom: 6px; }
+  .achievement-name { font-size: 11px; color: var(--text2); font-weight: 600; }
+
+  /* ── SETTINGS PANEL ── */
+  #settingsPanel {
+    overflow-y: auto;
+    padding: 16px;
+  }
+  .settings-section { margin-bottom: 20px; }
+  .settings-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text3);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-bottom: 8px;
+    padding-left: 4px;
+  }
+  .settings-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+  }
+  .settings-row {
+    display: flex;
+    align-items: center;
+    padding: 16px;
+    border-bottom: 1px solid var(--border);
+    gap: 12px;
+  }
+  .settings-row:last-child { border-bottom: none; }
+  .settings-icon { font-size: 20px; flex-shrink: 0; }
+  .settings-info { flex: 1; }
+  .settings-name { font-size: 15px; color: var(--text); font-weight: 500; }
+  .settings-desc { font-size: 12px; color: var(--text3); margin-top: 2px; }
+  .toggle {
+    width: 44px;
+    height: 26px;
+    background: var(--bg2);
+    border-radius: 13px;
+    border: none;
+    cursor: pointer;
+    position: relative;
+    transition: background 0.2s;
+    flex-shrink: 0;
+  }
+  .toggle::after {
+    content: '';
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    background: #fff;
+    border-radius: 50%;
+    top: 3px;
+    left: 3px;
+    transition: transform 0.2s;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+  }
+  .toggle.on { background: var(--primary); }
+  .toggle.on::after { transform: translateX(18px); }
+  .settings-select {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 6px 10px;
+    color: var(--text);
+    font-size: 13px;
+    outline: none;
+  }
+  .danger-btn {
+    background: rgba(248,113,113,0.1);
+    border: 1px solid rgba(248,113,113,0.3);
+    border-radius: 12px;
+    padding: 14px;
+    color: var(--red);
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    width: 100%;
+    text-align: center;
+  }
+
+  /* ── MODAL ── */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    z-index: 100;
+    align-items: flex-end;
+    justify-content: center;
+  }
+  .modal-overlay.active { display: flex; }
+  .modal {
+    background: var(--bg2);
+    border-radius: 24px 24px 0 0;
+    padding: 24px;
+    width: 100%;
+    max-width: 500px;
+    max-height: 80dvh;
+    overflow-y: auto;
+    animation: slideUp 0.3s ease;
+  }
+  @keyframes slideUp {
+    from { transform: translateY(100%); }
+    to { transform: translateY(0); }
+  }
+  .modal-handle {
+    width: 36px;
+    height: 4px;
+    background: var(--text3);
+    border-radius: 2px;
+    margin: 0 auto 20px;
+  }
+  .modal-title {
+    font-size: 18px;
+    font-weight: 800;
+    margin-bottom: 16px;
+  }
+  .modal-input {
+    width: 100%;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 16px;
+    color: var(--text);
+    font-size: 15px;
+    outline: none;
+    margin-bottom: 12px;
+  }
+  .modal-input:focus { border-color: var(--primary); }
+  .modal-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 8px;
+  }
+  .btn-secondary {
+    flex: 1;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px;
+    color: var(--text2);
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .btn-confirm {
+    flex: 1;
+    background: var(--primary);
+    border: none;
+    border-radius: 12px;
+    padding: 14px;
+    color: #fff;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  /* Toast */
+  #toast {
+    position: fixed;
+    bottom: 90px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--card2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 12px 20px;
+    font-size: 14px;
+    color: var(--text);
+    opacity: 0;
+    transition: all 0.3s;
+    z-index: 200;
+    white-space: nowrap;
+    max-width: 90vw;
+    text-align: center;
+  }
+  #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  /* Word added animation */
+  .word-added-pill {
+    position: fixed;
+    bottom: 100px;
+    right: 16px;
+    background: rgba(74,222,128,0.15);
+    border: 1px solid rgba(74,222,128,0.3);
+    border-radius: 20px;
+    padding: 8px 14px;
+    font-size: 13px;
+    color: var(--green);
+    font-weight: 600;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all 0.3s;
+    z-index: 200;
+    pointer-events: none;
+  }
+  .word-added-pill.show { opacity: 1; transform: translateY(0); }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--text3); border-radius: 2px; }
+
+  /* Loading overlay */
+  #loadingOverlay {
+    position: fixed;
+    inset: 0;
+    background: var(--bg);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 300;
+  }
+  .loading-logo { font-size: 56px; margin-bottom: 16px; animation: logoBounce 1s infinite; }
+  @keyframes logoBounce {
+    0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)}
+  }
+  .loading-text {
+    font-size: 22px;
+    font-weight: 800;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .loading-sub { color: var(--text3); font-size: 13px; margin-top: 8px; }
+
+  /* Config warning */
+  #configWarning {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    background: rgba(251,191,36,0.15);
+    border-bottom: 1px solid rgba(251,191,36,0.4);
+    padding: 12px 16px;
+    font-size: 13px;
+    color: var(--yellow);
+    z-index: 50;
+    text-align: center;
+  }
+
+  /* Profile pic colors */
+  .color-0 { background: linear-gradient(135deg, #6C63FF, #FF6584); }
+  .color-1 { background: linear-gradient(135deg, #4ade80, #06b6d4); }
+  .color-2 { background: linear-gradient(135deg, #fbbf24, #f97316); }
+  .color-3 { background: linear-gradient(135deg, #a78bfa, #ec4899); }
+  .color-4 { background: linear-gradient(135deg, #34d399, #6C63FF); }
+</style>
+</head>
+<body>
+
+<!-- Loading -->
+<div id="loadingOverlay">
+  <div class="loading-logo">🎙️</div>
+  <div class="loading-text">SpeakUp</div>
+  <div class="loading-sub">AI English Tutor</div>
+</div>
+
+<!-- Config Warning -->
+<div id="configWarning">
+  ⚠️ API anahtarları yapılandırılmamış. Demo modunda çalışıyor. <strong>Ayarlar</strong>'dan yapılandırın.
+</div>
+
+<!-- LOGIN -->
+<div id="loginScreen">
+  <div class="login-logo">🎙️</div>
+  <div class="login-title">SpeakUp</div>
+  <div class="login-sub">AI destekli İngilizce konuşma pratiği</div>
+  <div class="login-card">
+    <div class="form-group">
+      <label>Kullanıcı adı</label>
+      <input type="text" id="loginUser" placeholder="Kullanıcı adınızı girin" autocomplete="username">
+    </div>
+    <div class="form-group">
+      <label>Şifre</label>
+      <input type="password" id="loginPass" placeholder="Şifrenizi girin" autocomplete="current-password">
+    </div>
+    <button class="btn-primary" onclick="handleLogin()">Giriş Yap</button>
+    <div class="error-msg" id="loginError"></div>
+  </div>
+</div>
+
+<!-- SETUP (ilk kullanım) -->
+<div id="setupScreen">
+  <div class="setup-header">
+    <h2>Merhaba! 👋</h2>
+    <p>Sana özel bir deneyim oluşturalım</p>
+  </div>
+  <div class="setup-card">
+    <h3>📊 İngilizce Seviyeniz</h3>
+    <div class="option-grid">
+      <div class="option-btn" onclick="selectSetup('level','A1', this)">🌱 A1 - Başlangıç</div>
+      <div class="option-btn" onclick="selectSetup('level','A2', this)">🌿 A2 - Temel</div>
+      <div class="option-btn" onclick="selectSetup('level','B1', this)">🌳 B1 - Orta</div>
+      <div class="option-btn" onclick="selectSetup('level','B2', this)">🏆 B2 - Üst Orta</div>
+      <div class="option-btn option-full" onclick="selectSetup('level','C1', this)">⭐ C1 - İleri</div>
+    </div>
+  </div>
+  <div class="setup-card">
+    <h3>🎯 Öncelikli Hedef</h3>
+    <div class="option-grid">
+      <div class="option-btn" onclick="selectSetup('goal','business', this)">💼 İş İngilizcesi</div>
+      <div class="option-btn" onclick="selectSetup('goal','daily', this)">🏠 Gündelik Hayat</div>
+      <div class="option-btn" onclick="selectSetup('goal','travel', this)">✈️ Seyahat</div>
+      <div class="option-btn" onclick="selectSetup('goal','academic', this)">📚 Akademik</div>
+    </div>
+  </div>
+  <div class="setup-card">
+    <h3>❤️ İlgi Alanları</h3>
+    <div class="interests-grid">
+      <div class="interest-chip" onclick="toggleInterest('technology', this)"><span>💻</span>Teknoloji</div>
+      <div class="interest-chip" onclick="toggleInterest('travel', this)"><span>✈️</span>Seyahat</div>
+      <div class="interest-chip" onclick="toggleInterest('food', this)"><span>🍔</span>Yemek</div>
+      <div class="interest-chip" onclick="toggleInterest('sports', this)"><span>⚽</span>Spor</div>
+      <div class="interest-chip" onclick="toggleInterest('music', this)"><span>🎵</span>Müzik</div>
+      <div class="interest-chip" onclick="toggleInterest('cinema', this)"><span>🎬</span>Sinema</div>
+      <div class="interest-chip" onclick="toggleInterest('nature', this)"><span>🌿</span>Doğa</div>
+      <div class="interest-chip" onclick="toggleInterest('finance', this)"><span>💰</span>Finans</div>
+      <div class="interest-chip" onclick="toggleInterest('health', this)"><span>💪</span>Sağlık</div>
+    </div>
+  </div>
+  <div class="setup-card">
+    <h3>🗣️ Tercih Ettiğiniz Aksanlar</h3>
+    <div class="option-grid">
+      <div class="option-btn" onclick="selectSetup('accent','american', this)">🇺🇸 Amerikan</div>
+      <div class="option-btn" onclick="selectSetup('accent','british', this)">🇬🇧 İngiliz</div>
+    </div>
+  </div>
+  <button class="btn-primary" onclick="finishSetup()" style="margin-bottom: 40px;">Haydi Başlayalım! 🚀</button>
+</div>
+
+<!-- MAIN APP -->
+<div id="app">
+  <div class="app-header">
+    <div class="header-avatar" id="headerAvatar">🤖</div>
+    <div class="header-info">
+      <div class="header-name" id="headerName">Alex</div>
+      <div class="header-status"><div class="status-dot"></div><span id="headerStatus">AI Tutor • Hazır</span></div>
+    </div>
+    <div class="header-actions">
+      <button class="header-btn" onclick="openNewTopicModal()" title="Yeni konu">💬</button>
+      <button class="header-btn" onclick="logout()" title="Çıkış">👤</button>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('chat', this)">
+      <span class="tab-icon">💬</span>Sohbet
+    </button>
+    <button class="tab" onclick="switchTab('vocab', this)">
+      <span class="tab-icon">📚</span>Kelimeler
+    </button>
+    <button class="tab" onclick="switchTab('progress', this)">
+      <span class="tab-icon">📈</span>İlerleme
+    </button>
+    <button class="tab" onclick="switchTab('settings', this)">
+      <span class="tab-icon">⚙️</span>Ayarlar
+    </button>
+  </div>
+
+  <!-- CHAT -->
+  <div id="chatPanel" class="tab-panel active">
+    <div class="conversation-view" id="conversationView">
+      <div class="date-divider" id="todayDivider">Bugün</div>
+    </div>
+    <div class="ai-speaking-bar" id="aiSpeakingBar">
+      <div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div>
+      <div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div>
+      <div class="wave-bar"></div>
+      <span class="ai-speaking-text">Alex konuşuyor...</span>
+      <button class="stop-speak-btn" onclick="stopSpeaking()">⏹ Durdur</button>
+    </div>
+    <div class="input-bar">
+      <div class="text-input-wrap">
+        <textarea id="chatInput" placeholder="Mesaj yaz ya da mikrofona bas..." rows="1"
+          oninput="autoResize(this)" onkeydown="handleInputKey(event)"></textarea>
+        <button class="send-btn" onclick="sendTextMessage()">➤</button>
+      </div>
+      <button class="mic-btn" id="micBtn" onclick="toggleMic()">🎤</button>
+    </div>
+  </div>
+
+  <!-- VOCAB -->
+  <div id="vocabPanel" class="tab-panel">
+    <div class="vocab-header">
+      <div class="vocab-search-wrap">
+        <input type="search" class="vocab-search" placeholder="Kelime ara..." id="vocabSearch"
+          oninput="filterVocab(this.value)">
+        <button class="add-word-btn" onclick="openAddWordModal()">+ Ekle</button>
+      </div>
+      <div class="vocab-stats">
+        <div class="vocab-stat">Toplam: <strong id="vocabTotal">0</strong></div>
+        <div class="vocab-stat">Öğrenildi: <strong id="vocabLearned">0</strong></div>
+        <div class="vocab-stat">Pratik: <strong id="vocabPracticing">0</strong></div>
+      </div>
+    </div>
+    <div class="vocab-list" id="vocabList"></div>
+  </div>
+
+  <!-- PROGRESS -->
+  <div id="progressPanel" class="tab-panel">
+    <div class="progress-card">
+      <h3>📊 Genel İstatistikler</h3>
+      <div class="stat-row"><span class="stat-label">Toplam Konuşma</span><span class="stat-value" id="statConversations">0</span></div>
+      <div class="stat-row"><span class="stat-label">Toplam Mesaj</span><span class="stat-value" id="statMessages">0</span></div>
+      <div class="stat-row"><span class="stat-label">Öğrenilen Kelime</span><span class="stat-value" id="statWords">0</span></div>
+      <div class="stat-row"><span class="stat-label">Konuşma Süresi</span><span class="stat-value" id="statTime">0 dk</span></div>
+    </div>
+    <div class="progress-card">
+      <h3>⬆️ Seviye İlerlemesi</h3>
+      <div class="level-bar-wrap">
+        <div class="level-label">
+          <span id="levelCurrent">B1</span>
+          <span id="levelXP">0 / 100 XP</span>
+        </div>
+        <div class="level-bar-bg">
+          <div class="level-bar-fill" id="levelBarFill" style="width:0%"></div>
+        </div>
+      </div>
+    </div>
+    <div class="progress-card">
+      <h3>🔥 Günlük Seri</h3>
+      <div class="streak-display">
+        <div class="streak-num" id="streakNum">0</div>
+        <div class="streak-label">gün üst üste pratik</div>
+      </div>
+    </div>
+    <div class="progress-card">
+      <h3>🏅 Başarımlar</h3>
+      <div class="achievement-grid" id="achievementGrid"></div>
+    </div>
+  </div>
+
+  <!-- SETTINGS -->
+  <div id="settingsPanel" class="tab-panel">
+    <div class="settings-section">
+      <div class="settings-title">Profil</div>
+      <div class="settings-card">
+        <div class="settings-row">
+          <span class="settings-icon">👤</span>
+          <div class="settings-info">
+            <div class="settings-name" id="settingsUsername">-</div>
+            <div class="settings-desc" id="settingsLevel">Seviye bilgisi</div>
+          </div>
+          <button class="btn-secondary" style="padding:8px 14px;font-size:13px" onclick="openProfileModal()">Düzenle</button>
+        </div>
+      </div>
+    </div>
+    <div class="settings-section">
+      <div class="settings-title">AI Tutor Ayarları</div>
+      <div class="settings-card">
+        <div class="settings-row">
+          <span class="settings-icon">🔊</span>
+          <div class="settings-info">
+            <div class="settings-name">Sesli Yanıt</div>
+            <div class="settings-desc">AI sesli olarak cevap versin</div>
+          </div>
+          <button class="toggle on" id="toggleVoice" onclick="toggleSetting('voice', this)"></button>
+        </div>
+        <div class="settings-row">
+          <span class="settings-icon">✏️</span>
+          <div class="settings-info">
+            <div class="settings-name">Anlık Düzeltme</div>
+            <div class="settings-desc">Hataları sohbet içinde göster</div>
+          </div>
+          <button class="toggle on" id="toggleCorrection" onclick="toggleSetting('correction', this)"></button>
+        </div>
+        <div class="settings-row">
+          <span class="settings-icon">💡</span>
+          <div class="settings-info">
+            <div class="settings-name">Kelime Önerileri</div>
+            <div class="settings-desc">Yeni kelimeler öner</div>
+          </div>
+          <button class="toggle on" id="toggleSuggestions" onclick="toggleSetting('suggestions', this)"></button>
+        </div>
+        <div class="settings-row">
+          <span class="settings-icon">🗣️</span>
+          <div class="settings-info">
+            <div class="settings-name">Aksanı</div>
+            <div class="settings-desc">AI konuşma aksanı</div>
+          </div>
+          <select class="settings-select" id="accentSelect" onchange="updateAccent(this.value)">
+            <option value="en-US">🇺🇸 Amerikan</option>
+            <option value="en-GB">🇬🇧 İngiliz</option>
+          </select>
+        </div>
+        <div class="settings-row">
+          <span class="settings-icon">⚡</span>
+          <div class="settings-info">
+            <div class="settings-name">Konuşma Hızı</div>
+            <div class="settings-desc">AI konuşma hızı</div>
+          </div>
+          <select class="settings-select" id="speedSelect" onchange="updateSpeed(this.value)">
+            <option value="0.8">Yavaş</option>
+            <option value="1.0" selected>Normal</option>
+            <option value="1.2">Hızlı</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="settings-section">
+      <div class="settings-title">API Yapılandırması</div>
+      <div class="settings-card">
+        <div class="settings-row">
+          <span class="settings-icon">🔑</span>
+          <div class="settings-info">
+            <div class="settings-name">OpenAI API Key</div>
+            <div class="settings-desc" id="openaiStatus">Yapılandırılmamış</div>
+          </div>
+          <button class="btn-secondary" style="padding:8px 14px;font-size:13px" onclick="openApiModal()">Ayarla</button>
+        </div>
+        <div class="settings-row">
+          <span class="settings-icon">🔥</span>
+          <div class="settings-info">
+            <div class="settings-name">Firebase</div>
+            <div class="settings-desc" id="firebaseStatus">Yapılandırılmamış</div>
+          </div>
+          <button class="btn-secondary" style="padding:8px 14px;font-size:13px" onclick="openFirebaseModal()">Ayarla</button>
+        </div>
+      </div>
+    </div>
+    <div class="settings-section">
+      <div class="settings-title">Tehlikeli Bölge</div>
+      <button class="danger-btn" onclick="confirmClearData()">🗑️ Tüm Konuşma Geçmişini Temizle</button>
+    </div>
+    <div style="text-align:center; padding: 20px; color: var(--text3); font-size: 12px; padding-bottom: 40px;">
+      SpeakUp v1.0 • AI English Tutor
+    </div>
+  </div>
+</div>
+
+<!-- MODALS -->
+<!-- Add Word Modal -->
+<div class="modal-overlay" id="addWordModal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">📚 Kelime Ekle</div>
+    <input type="text" class="modal-input" id="newWordEn" placeholder="İngilizce kelime/ifade">
+    <input type="text" class="modal-input" id="newWordTr" placeholder="Türkçe anlamı">
+    <input type="text" class="modal-input" id="newWordExample" placeholder="Örnek cümle (opsiyonel)">
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeModal('addWordModal')">İptal</button>
+      <button class="btn-confirm" onclick="addWordManually()">Ekle</button>
+    </div>
+  </div>
+</div>
+
+<!-- New Topic Modal -->
+<div class="modal-overlay" id="newTopicModal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">💬 Yeni Konu</div>
+    <p style="color:var(--text2);font-size:14px;margin-bottom:16px">Konuşmak istediğin konuyu seç veya AI'ın seçmesine izin ver.</p>
+    <div class="option-grid" style="margin-bottom:16px">
+      <div class="option-btn" onclick="startTopic('business')">💼 İş Hayatı</div>
+      <div class="option-btn" onclick="startTopic('daily')">🏠 Gündelik Hayat</div>
+      <div class="option-btn" onclick="startTopic('travel')">✈️ Seyahat</div>
+      <div class="option-btn" onclick="startTopic('technology')">💻 Teknoloji</div>
+      <div class="option-btn" onclick="startTopic('hobbies')">🎮 Hobiler</div>
+      <div class="option-btn" onclick="startTopic('health')">💪 Sağlık</div>
+      <div class="option-btn" onclick="startTopic('food')">🍔 Yemek & Kültür</div>
+      <div class="option-btn" onclick="startTopic('current')">🌍 Güncel Olaylar</div>
+      <div class="option-btn option-full" onclick="startTopic('random')">🎲 AI Seçsin</div>
+    </div>
+    <button class="btn-secondary" onclick="closeModal('newTopicModal')">İptal</button>
+  </div>
+</div>
+
+<!-- API Modal -->
+<div class="modal-overlay" id="apiModal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">🔑 OpenAI API Key</div>
+    <p style="color:var(--text2);font-size:13px;margin-bottom:16px">
+      <a href="https://platform.openai.com" target="_blank" style="color:var(--primary)">platform.openai.com</a>'dan API anahtarınızı alın. Bu cihazda güvenli şekilde saklanır.
+    </p>
+    <input type="password" class="modal-input" id="openaiKeyInput" placeholder="sk-...">
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeModal('apiModal')">İptal</button>
+      <button class="btn-confirm" onclick="saveApiKey()">Kaydet</button>
+    </div>
+  </div>
+</div>
+
+<!-- Firebase Modal -->
+<div class="modal-overlay" id="firebaseModal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">🔥 Firebase Yapılandırma</div>
+    <p style="color:var(--text2);font-size:13px;margin-bottom:16px">
+      Firebase Console'dan web uygulamanızın config JSON'ını yapıştırın.
+    </p>
+    <textarea class="modal-input" id="firebaseConfigInput" rows="6"
+      placeholder='{"apiKey":"...","authDomain":"...","projectId":"...","storageBucket":"...","messagingSenderId":"...","appId":"..."}'
+      style="font-size:12px;font-family:monospace;resize:vertical"></textarea>
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeModal('firebaseModal')">İptal</button>
+      <button class="btn-confirm" onclick="saveFirebaseConfig()">Kaydet & Bağlan</button>
+    </div>
+  </div>
+</div>
+
+<!-- Profile Modal -->
+<div class="modal-overlay" id="profileModal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">👤 Profil Düzenle</div>
+    <input type="text" class="modal-input" id="profileName" placeholder="Görünen ad">
+    <div style="margin-bottom:12px">
+      <label style="font-size:12px;color:var(--text2);display:block;margin-bottom:8px">Seviye</label>
+      <select class="modal-input" id="profileLevel" style="padding:12px">
+        <option value="A1">A1 - Başlangıç</option>
+        <option value="A2">A2 - Temel</option>
+        <option value="B1">B1 - Orta</option>
+        <option value="B2">B2 - Üst Orta</option>
+        <option value="C1">C1 - İleri</option>
+      </select>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeModal('profileModal')">İptal</button>
+      <button class="btn-confirm" onclick="saveProfile()">Kaydet</button>
+    </div>
+  </div>
+</div>
+
+<!-- Word Added Pill -->
+<div class="word-added-pill" id="wordAddedPill">✓ Kelime listene eklendi!</div>
+<div id="toast"></div>
+
+<!-- Firebase SDK -->
+<script type="module">
+import { initializeApp, getApps } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged }
+  from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+import { getFirestore, doc, getDoc, setDoc, updateDoc, onSnapshot, serverTimestamp }
+  from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+
+// ═══════════════════════════════════════════════
+//  APP STATE
+// ═══════════════════════════════════════════════
+const APP = {
+  firebase: null, auth: null, db: null, unsubscribe: null,
+  user: null, profile: null,
+  openaiKey: localStorage.getItem('speakup_openai_key') || '',
+  firebaseConfigRaw: localStorage.getItem('speakup_firebase_config') || '{"apiKey":"AIzaSyAeBg_Tgll0jqlJ_kythhjdAdizpYfWIo4","authDomain":"english-ai-tutor-3912e.firebaseapp.com","databaseURL":"https://english-ai-tutor-3912e-default-rtdb.europe-west1.firebasedatabase.app","projectId":"english-ai-tutor-3912e","storageBucket":"english-ai-tutor-3912e.firebasestorage.app","messagingSenderId":"911161316226","appId":"1:911161316226:web:a0f83d360325f2cce3f59b"}',
+  messages: [],     // {role, content, time, correction?, suggestion?, newWord?}
+  vocab: [],
+  stats: { conversations:0, messages:0, words:0, time:0, xp:0, streak:0, lastDate:'' },
+  settings: { voice:true, correction:true, suggestions:true, accent:'en-US', speed:1.0 },
+  setupData: { level:'B1', goal:'business', accent:'american', interests:[] },
+  currentTopic: null,
+  isSpeaking: false, isRecording: false,
+  speechSynthesis: window.speechSynthesis,
+  recognition: null,
+  currentUtterance: null,
+  sessionStart: Date.now(),
+  configOk: false,
+  fbConfigured: false,
+};
+
+// ═══════════════════════════════════════════════
+//  USERS (local fallback)
+// ═══════════════════════════════════════════════
+const LOCAL_USERS = {
+  'user1': { password:'pass1', displayName:'Kullanıcı 1', colorIndex:0 },
+  'user2': { password:'pass2', displayName:'Kullanıcı 2', colorIndex:1 },
+  'user3': { password:'pass3', displayName:'Kullanıcı 3', colorIndex:2 },
+  'user4': { password:'pass4', displayName:'Kullanıcı 4', colorIndex:3 },
+  'user5': { password:'pass5', displayName:'Kullanıcı 5', colorIndex:4 },
+};
+
+// ═══════════════════════════════════════════════
+//  FIREBASE INIT
+// ═══════════════════════════════════════════════
+async function initFirebase() {
+  const raw = APP.firebaseConfigRaw;
+  if (!raw) return false;
+  try {
+    const config = JSON.parse(raw);
+    if (getApps().length === 0) {
+      APP.firebase = initializeApp(config);
+    } else {
+      APP.firebase = getApps()[0];
+    }
+    APP.auth = getAuth(APP.firebase);
+    APP.db = getFirestore(APP.firebase);
+    APP.fbConfigured = true;
+    document.getElementById('firebaseStatus').textContent = '✅ Bağlı';
+    return true;
+  } catch(e) {
+    console.warn('Firebase init failed:', e);
+    return false;
+  }
+}
+
+// ═══════════════════════════════════════════════
+//  BOOT
+// ═══════════════════════════════════════════════
+window.addEventListener('load', async () => {
+  // Try Firebase
+  if (APP.firebaseConfigRaw) await initFirebase();
+  // Always mark OpenAI as configured (key is embedded)
+  localStorage.setItem('speakup_openai_key', APP.openaiKey);
+  document.getElementById('openaiStatus').textContent = '✅ Yapılandırıldı';
+  APP.configOk = true;
+
+  // Check saved session
+  const savedUser = localStorage.getItem('speakup_current_user');
+  if (savedUser) {
+    APP.user = savedUser;
+    await loadUserData(savedUser);
+    showApp();
+  }
+
+  setTimeout(() => {
+    document.getElementById('loadingOverlay').style.display = 'none';
+  }, 1200);
+});
+
+// ═══════════════════════════════════════════════
+//  AUTH
+// ═══════════════════════════════════════════════
+window.handleLogin = async function() {
+  const username = document.getElementById('loginUser').value.trim();
+  const password = document.getElementById('loginPass').value;
+  const errEl = document.getElementById('loginError');
+  errEl.textContent = '';
+
+  if (!username || !password) { errEl.textContent = 'Kullanıcı adı ve şifre gereklidir.'; return; }
+
+  // Firebase auth (email format)
+  if (APP.fbConfigured && APP.auth && username.includes('@')) {
+    try {
+      await signInWithEmailAndPassword(APP.auth, username, password);
+      APP.user = username;
+      localStorage.setItem('speakup_current_user', username);
+      await loadUserData(username);
+      showApp();
+      return;
+    } catch(e) {
+      // Try create account
+      try {
+        await createUserWithEmailAndPassword(APP.auth, username, password);
+        APP.user = username;
+        localStorage.setItem('speakup_current_user', username);
+        await loadUserData(username);
+        showApp();
+        return;
+      } catch(e2) {
+        errEl.textContent = 'Giriş başarısız: ' + e2.message;
+        return;
+      }
+    }
+  }
+
+  // Local user check
+  const userKey = username.toLowerCase();
+  if (LOCAL_USERS[userKey]) {
+    if (LOCAL_USERS[userKey].password === password || password === LOCAL_USERS[userKey].password) {
+      APP.user = userKey;
+      localStorage.setItem('speakup_current_user', userKey);
+      await loadUserData(userKey);
+      showApp();
+    } else {
+      errEl.textContent = 'Hatalı şifre.';
+    }
+  } else {
+    // Create new local user
+    if (password.length < 4) { errEl.textContent = 'Şifre en az 4 karakter olmalı.'; return; }
+    const allUsers = JSON.parse(localStorage.getItem('speakup_users') || '{}');
+    if (allUsers[username]) {
+      if (allUsers[username].password !== password) { errEl.textContent = 'Hatalı şifre.'; return; }
+    } else {
+      allUsers[username] = { password, displayName: username, colorIndex: Object.keys(allUsers).length % 5 };
+      localStorage.setItem('speakup_users', JSON.stringify(allUsers));
+    }
+    APP.user = username;
+    localStorage.setItem('speakup_current_user', username);
+    await loadUserData(username);
+    showApp();
+  }
+};
+
+window.logout = function() {
+  if (confirm('Çıkış yapmak istiyor musunuz?')) {
+    saveUserData();
+    APP.user = null;
+    APP.messages = [];
+    APP.profile = null;
+    localStorage.removeItem('speakup_current_user');
+    if (APP.recognition) APP.recognition.stop();
+    stopSpeaking();
+    document.getElementById('app').style.display = 'none';
+    document.getElementById('loginScreen').style.display = 'flex';
+    document.getElementById('loginUser').value = '';
+    document.getElementById('loginPass').value = '';
+  }
+};
+
+// ═══════════════════════════════════════════════
+//  DATA
+// ═══════════════════════════════════════════════
+async function loadUserData(uid) {
+  const key = `speakup_data_${uid}`;
+
+  // Firebase first
+  if (APP.fbConfigured && APP.db) {
+    try {
+      const snap = await getDoc(doc(APP.db, 'users', uid));
+      if (snap.exists()) {
+        const data = snap.data();
+        APP.profile = data.profile || null;
+        APP.messages = data.messages || [];
+        APP.vocab = data.vocab || [];
+        APP.stats = { ...APP.stats, ...(data.stats || {}) };
+        APP.settings = { ...APP.settings, ...(data.settings || {}) };
+        localStorage.setItem(key, JSON.stringify(data));
+        applySettings();
+        return;
+      }
+    } catch(e) { console.warn('Firebase read failed, using local'); }
+  }
+
+  // Local storage
+  try {
+    const local = localStorage.getItem(key);
+    if (local) {
+      const data = JSON.parse(local);
+      APP.profile = data.profile || null;
+      APP.messages = data.messages || [];
+      APP.vocab = data.vocab || [];
+      APP.stats = { ...APP.stats, ...(data.stats || {}) };
+      APP.settings = { ...APP.settings, ...(data.settings || {}) };
+    }
+  } catch(e) {}
+  applySettings();
+}
+
+async function saveUserData() {
+  if (!APP.user) return;
+  const key = `speakup_data_${APP.user}`;
+  const data = {
+    profile: APP.profile,
+    messages: APP.messages.slice(-200), // keep last 200
+    vocab: APP.vocab,
+    stats: APP.stats,
+    settings: APP.settings,
+    updatedAt: new Date().toISOString()
+  };
+  localStorage.setItem(key, JSON.stringify(data));
+
+  if (APP.fbConfigured && APP.db) {
+    try {
+      await setDoc(doc(APP.db, 'users', APP.user), { ...data, updatedAt: serverTimestamp() }, { merge: true });
+    } catch(e) { console.warn('Firebase save failed'); }
+  }
+}
+
+// Auto-save every 30s
+setInterval(() => { if (APP.user) saveUserData(); }, 30000);
+window.addEventListener('beforeunload', () => { if (APP.user) saveUserData(); });
+window.addEventListener('visibilitychange', () => { if (document.hidden && APP.user) saveUserData(); });
+
+// ═══════════════════════════════════════════════
+//  SHOW APP
+// ═══════════════════════════════════════════════
+function showApp() {
+  document.getElementById('loginScreen').style.display = 'none';
+
+  if (!APP.profile) {
+    document.getElementById('setupScreen').style.display = 'flex';
+    return;
+  }
+
+  if (!APP.configOk) {
+    document.getElementById('configWarning').style.display = 'block';
+  }
+
+  renderApp();
+}
+
+function renderApp() {
+  document.getElementById('setupScreen').style.display = 'none';
+  document.getElementById('app').style.display = 'flex';
+
+  // Header
+  const allUsers = JSON.parse(localStorage.getItem('speakup_users') || '{}');
+  const localUser = LOCAL_USERS[APP.user] || allUsers[APP.user];
+  const colorIndex = (APP.profile && APP.profile.colorIndex !== undefined) ? APP.profile.colorIndex : (localUser ? localUser.colorIndex : 0);
+  const avatarEl = document.getElementById('headerAvatar');
+  avatarEl.className = `header-avatar color-${colorIndex}`;
+  const displayName = APP.profile?.displayName || APP.user;
+  avatarEl.textContent = displayName.charAt(0).toUpperCase();
+  document.getElementById('headerName').textContent = displayName + "'s Space";
+  document.getElementById('settingsUsername').textContent = displayName;
+  document.getElementById('settingsLevel').textContent = 'Seviye: ' + (APP.profile?.level || 'B1') + ' • ' + goalLabel(APP.profile?.goal);
+
+  applySettings();
+  renderMessages();
+  renderVocab();
+  renderStats();
+  renderAchievements();
+
+  // Start conversation if no messages
+  if (APP.messages.length === 0) {
+    setTimeout(() => aiGreet(), 800);
+  }
+}
+
+function goalLabel(g) {
+  const map = { business:'İş İngilizcesi', daily:'Gündelik Hayat', travel:'Seyahat', academic:'Akademik' };
+  return map[g] || 'Genel';
+}
+
+// ═══════════════════════════════════════════════
+//  SETUP
+// ═══════════════════════════════════════════════
+window.selectSetup = function(key, value, el) {
+  APP.setupData[key] = value;
+  el.closest('.option-grid').querySelectorAll('.option-btn').forEach(b => b.classList.remove('selected'));
+  el.classList.add('selected');
+};
+
+window.toggleInterest = function(interest, el) {
+  el.classList.toggle('selected');
+  const idx = APP.setupData.interests.indexOf(interest);
+  if (idx > -1) APP.setupData.interests.splice(idx, 1);
+  else APP.setupData.interests.push(interest);
+};
+
+window.finishSetup = function() {
+  if (!APP.setupData.level) { showToast('Lütfen seviyenizi seçin'); return; }
+  const allUsers = JSON.parse(localStorage.getItem('speakup_users') || '{}');
+  const localUser = LOCAL_USERS[APP.user] || allUsers[APP.user];
+  APP.profile = {
+    displayName: localUser?.displayName || APP.user,
+    level: APP.setupData.level,
+    goal: APP.setupData.goal || 'business',
+    accent: APP.setupData.accent || 'american',
+    interests: APP.setupData.interests,
+    colorIndex: localUser?.colorIndex || 0,
+    createdAt: new Date().toISOString()
+  };
+  APP.settings.accent = APP.setupData.accent === 'british' ? 'en-GB' : 'en-US';
+  saveUserData();
+  renderApp();
+};
+
+// ═══════════════════════════════════════════════
+//  SETTINGS
+// ═══════════════════════════════════════════════
+function applySettings() {
+  document.getElementById('toggleVoice').className = 'toggle ' + (APP.settings.voice ? 'on' : '');
+  document.getElementById('toggleCorrection').className = 'toggle ' + (APP.settings.correction ? 'on' : '');
+  document.getElementById('toggleSuggestions').className = 'toggle ' + (APP.settings.suggestions ? 'on' : '');
+  document.getElementById('accentSelect').value = APP.settings.accent || 'en-US';
+  document.getElementById('speedSelect').value = APP.settings.speed || '1.0';
+}
+
+window.toggleSetting = function(key, el) {
+  APP.settings[key] = !APP.settings[key];
+  el.className = 'toggle ' + (APP.settings[key] ? 'on' : '');
+  saveUserData();
+};
+
+window.updateAccent = function(val) { APP.settings.accent = val; saveUserData(); };
+window.updateSpeed = function(val) { APP.settings.speed = parseFloat(val); saveUserData(); };
+
+window.openApiModal = function() {
+  document.getElementById('openaiKeyInput').value = APP.openaiKey ? '••••••••' + APP.openaiKey.slice(-4) : '';
+  openModal('apiModal');
+};
+
+window.saveApiKey = function() {
+  const val = document.getElementById('openaiKeyInput').value.trim();
+  if (val && !val.startsWith('••')) {
+    APP.openaiKey = val;
+    localStorage.setItem('speakup_openai_key', val);
+    APP.configOk = true;
+    document.getElementById('openaiStatus').textContent = '✅ Yapılandırıldı';
+    document.getElementById('configWarning').style.display = 'none';
+    showToast('API anahtarı kaydedildi ✓');
+  }
+  closeModal('apiModal');
+};
+
+window.openFirebaseModal = function() {
+  document.getElementById('firebaseConfigInput').value = APP.firebaseConfigRaw || '';
+  openModal('firebaseModal');
+};
+
+window.saveFirebaseConfig = async function() {
+  const val = document.getElementById('firebaseConfigInput').value.trim();
+  if (val) {
+    try {
+      JSON.parse(val);
+      APP.firebaseConfigRaw = val;
+      localStorage.setItem('speakup_firebase_config', val);
+      const ok = await initFirebase();
+      if (ok) showToast('Firebase bağlandı ✓');
+      else showToast('Firebase bağlantı hatası');
+    } catch(e) { showToast('Geçersiz JSON formatı'); return; }
+  }
+  closeModal('firebaseModal');
+};
+
+window.openProfileModal = function() {
+  document.getElementById('profileName').value = APP.profile?.displayName || '';
+  document.getElementById('profileLevel').value = APP.profile?.level || 'B1';
+  openModal('profileModal');
+};
+
+window.saveProfile = function() {
+  APP.profile.displayName = document.getElementById('profileName').value.trim() || APP.profile.displayName;
+  APP.profile.level = document.getElementById('profileLevel').value;
+  saveUserData();
+  renderApp();
+  closeModal('profileModal');
+  showToast('Profil güncellendi ✓');
+};
+
+window.confirmClearData = function() {
+  if (confirm('Tüm konuşma geçmişi silinecek. Emin misiniz?')) {
+    APP.messages = [];
+    saveUserData();
+    renderMessages();
+    showToast('Geçmiş temizlendi');
+  }
+};
+
+// ═══════════════════════════════════════════════
+//  OPENAI API
+// ═══════════════════════════════════════════════
+function buildSystemPrompt() {
+  const p = APP.profile || {};
+  const level = p.level || 'B1';
+  const goal = goalLabel(p.goal);
+  const interests = (p.interests || []).join(', ') || 'general topics';
+  const accent = p.accent || 'american';
+
+  return `You are Alex, a friendly and enthusiastic English conversation partner and tutor for a Turkish speaker learning English. Your personality is warm, encouraging, and natural — like chatting with a good friend who happens to be a great English teacher.
+
+USER PROFILE:
+- English Level: ${level}
+- Primary Goal: ${goal}
+- Interests: ${interests}
+- Preferred Accent: ${accent}
+
+YOUR APPROACH:
+1. CONVERSATION FIRST: Always respond naturally as a friend would. Keep the conversation flowing naturally. Never be robotic or overly formal.
+2. GENTLE CORRECTIONS: If the user makes a grammatical error or uses an awkward phrase, naturally weave in the correct version in your response (e.g., "Oh right, as you mentioned earlier — or as we'd say in English: '...'"). After your main response, you can add a brief, friendly note about the correction. Format corrections like: [CORRECTION: "incorrect version" → "correct version" — brief explanation]
+3. VOCABULARY BUILDING: When relevant, introduce 1-2 new words or phrases that fit naturally into the conversation. Format new words like: [NEWWORD: "word" | "Turkish meaning" | "example sentence"]
+4. PRONUNCIATION TIPS: Only mention pronunciation if it seems to be an issue or when introducing new words. Format like: [PRONUNCIATION: brief tip]
+5. SUGGESTIONS: Occasionally suggest better ways to express something. Format like: [SUGGESTION: brief tip about phrasing]
+
+CONVERSATION RULES:
+- Adjust vocabulary complexity to ${level} level
+- Ask follow-up questions to keep conversation going
+- Show genuine interest in what the user shares
+- Be encouraging — celebrate good usage!
+- Keep responses concise (2-4 sentences for casual chat, longer for explanations)
+- Mix topics naturally based on user's interests
+- For ${level} level: ${level <= 'B1' ? 'use simpler vocabulary, shorter sentences, explain idioms' : 'use natural vocabulary, idioms, more complex structures'}
+
+IMPORTANT: Respond in English. Your corrections and new word additions should be formatted with the special tags shown above so the app can parse them correctly.`;
+}
+
+async function callOpenAI(messages) {
+  if (!APP.openaiKey) return null;
+
+  const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${APP.openaiKey}`
+    },
+    body: JSON.stringify({
+      model: 'gpt-4o-mini',
+      messages: [
+        { role: 'system', content: buildSystemPrompt() },
+        ...messages.map(m => ({ role: m.role, content: m.content }))
+      ],
+      max_tokens: 500,
+      temperature: 0.85
+    })
+  });
+
+  if (!response.ok) {
+    const err = await response.json();
+    throw new Error(err.error?.message || 'API error');
+  }
+  const data = await response.json();
+  return data.choices[0].message.content;
+}
+
+// Parse AI response for special tags
+function parseAIResponse(text) {
+  const result = { main: text, corrections: [], suggestions: [], newWords: [], pronunciations: [] };
+
+  // Extract corrections
+  const correctionRegex = /\[CORRECTION:\s*"([^"]+)"\s*→\s*"([^"]+)"\s*[—-]\s*([^\]]+)\]/g;
+  let m;
+  while ((m = correctionRegex.exec(text)) !== null) {
+    result.corrections.push({ wrong: m[1], correct: m[2], explanation: m[3] });
+  }
+
+  // Extract new words
+  const wordRegex = /\[NEWWORD:\s*"([^"]+)"\s*\|\s*"([^"]+)"\s*\|\s*"([^"]+)"\]/g;
+  while ((m = wordRegex.exec(text)) !== null) {
+    result.newWords.push({ word: m[1], tr: m[2], example: m[3] });
+  }
+
+  // Extract suggestions
+  const suggestionRegex = /\[SUGGESTION:\s*([^\]]+)\]/g;
+  while ((m = suggestionRegex.exec(text)) !== null) {
+    result.suggestions.push(m[1]);
+  }
+
+  // Extract pronunciation
+  const pronRegex = /\[PRONUNCIATION:\s*([^\]]+)\]/g;
+  while ((m = pronRegex.exec(text)) !== null) {
+    result.pronunciations.push(m[1]);
+  }
+
+  // Clean main text
+  result.main = text
+    .replace(/\[CORRECTION:[^\]]+\]/g, '')
+    .replace(/\[NEWWORD:[^\]]+\]/g, '')
+    .replace(/\[SUGGESTION:[^\]]+\]/g, '')
+    .replace(/\[PRONUNCIATION:[^\]]+\]/g, '')
+    .trim();
+
+  return result;
+}
+
+// Demo responses when no API key
+function getDemoResponse(userMessage) {
+  const demos = [
+    "That's really interesting! I love how you're expressing yourself. By the way, a natural way to say that would be 'I'm really into it' instead of 'I like very much it'. So, what do you enjoy most about this topic? [CORRECTION: \"I like very much it\" → \"I really like it\" — adverbs go before the adjective or verb, not after the object] [NEWWORD: \"to be into something\" | \"bir şeye düşkün olmak\" | \"I'm really into learning languages.\"]",
+    "Oh, that reminds me of something similar! You know, in business English we often say 'touch base' when we want to check in with someone. What kind of work do you do? [NEWWORD: \"touch base\" | \"kısaca iletişime geçmek\" | \"Let's touch base on Monday to discuss the project.\"] [SUGGESTION: In formal contexts, try using 'I would like to' instead of 'I want to' — it sounds more professional.]",
+    "Ha, that's a great point! You're communicating really well. One little thing — we'd say 'I have been working' instead of 'I am working since' when talking about something that started in the past and continues now. Anyway, tell me more! [CORRECTION: \"I am working since\" → \"I have been working for/since\" — use present perfect continuous for ongoing actions that started in the past]",
+    "Absolutely, I totally get what you mean! That's actually a perfect opportunity to use the phrase 'on the other hand' — it's great for comparing two ideas. What's your take on it? [NEWWORD: \"on the other hand\" | \"öte yandan, diğer taraftan\" | \"It's expensive. On the other hand, the quality is excellent.\"]",
+    "Great, you're really getting the hang of this! Just a quick note — 'make' and 'do' can be tricky. We 'make a decision' but 'do business'. Keep it up! Now, what else has been on your mind lately? [NEWWORD: \"get the hang of\" | \"bir şeye alışmak, kavramak\" | \"It took me a while, but I finally got the hang of driving.\"]"
+  ];
+  return demos[Math.floor(Math.random() * demos.length)];
+}
+
+// ═══════════════════════════════════════════════
+//  MESSAGES & CHAT
+// ═══════════════════════════════════════════════
+function renderMessages() {
+  const container = document.getElementById('conversationView');
+  // Keep date divider
+  container.innerHTML = '<div class="date-divider">Bugün</div>';
+
+  APP.messages.forEach(msg => {
+    appendMessageToDOM(msg);
+  });
+
+  scrollToBottom();
+}
+
+function appendMessageToDOM(msg) {
+  const container = document.getElementById('conversationView');
+
+  if (msg.role === 'user') {
+    const row = document.createElement('div');
+    row.className = 'msg-row user';
+    row.innerHTML = `<div class="bubble">${escapeHtml(msg.content)}</div>
+      <div class="msg-time">${msg.time || ''}</div>`;
+    container.appendChild(row);
+  } else {
+    // AI message
+    const row = document.createElement('div');
+    row.className = 'msg-row ai';
+    row.innerHTML = `<div class="bubble">${escapeHtml(msg.main || msg.content)}</div>
+      <div class="msg-time">${msg.time || ''}</div>`;
+    container.appendChild(row);
+
+    // Corrections
+    if (msg.corrections && msg.corrections.length > 0 && APP.settings.correction) {
+      msg.corrections.forEach(c => {
+        const div = document.createElement('div');
+        div.className = 'correction-bubble';
+        div.innerHTML = `<div class="correction-label">✏️ Düzeltme</div>
+          <div>"${escapeHtml(c.wrong)}" → <strong>"${escapeHtml(c.correct)}"</strong></div>
+          <div style="margin-top:4px;opacity:0.8">${escapeHtml(c.explanation)}</div>`;
+        container.appendChild(div);
+      });
+    }
+
+    // Suggestions
+    if (msg.suggestions && msg.suggestions.length > 0 && APP.settings.suggestions) {
+      msg.suggestions.forEach(s => {
+        const div = document.createElement('div');
+        div.className = 'suggestion-bubble';
+        div.innerHTML = `<div class="suggestion-label">💡 İpucu</div>${escapeHtml(s)}`;
+        container.appendChild(div);
+      });
+    }
+
+    // Pronunciation
+    if (msg.pronunciations && msg.pronunciations.length > 0) {
+      msg.pronunciations.forEach(p => {
+        const div = document.createElement('div');
+        div.className = 'suggestion-bubble';
+        div.style.cssText = 'background:rgba(108,99,255,0.08);border-color:rgba(108,99,255,0.25);color:var(--primary)';
+        div.innerHTML = `<div class="suggestion-label" style="color:var(--primary)">🗣️ Telaffuz</div>${escapeHtml(p)}`;
+        container.appendChild(div);
+      });
+    }
+
+    // New words
+    if (msg.newWords && msg.newWords.length > 0) {
+      msg.newWords.forEach(w => {
+        const div = document.createElement('div');
+        div.className = 'suggestion-bubble';
+        div.innerHTML = `<div class="suggestion-label">📚 Yeni Kelime</div>
+          <strong>${escapeHtml(w.word)}</strong> = ${escapeHtml(w.tr)}<br>
+          <span style="font-size:12px;opacity:0.8">"${escapeHtml(w.example)}"</span>`;
+        container.appendChild(div);
+      });
+    }
+  }
+
+  scrollToBottom();
+}
+
+function scrollToBottom() {
+  const el = document.getElementById('conversationView');
+  setTimeout(() => el.scrollTop = el.scrollHeight, 50);
+}
+
+function getTime() {
+  return new Date().toLocaleTimeString('tr-TR', { hour:'2-digit', minute:'2-digit' });
+}
+
+async function aiGreet() {
+  showTyping();
+  const greetings = [
+    `Hey there! Great to see you today! 😊 I'm Alex, your English conversation partner. I'm here to help you practice English in a natural, fun way — no pressure, just like chatting with a friend!\n\nTo get us started, could you tell me a bit about yourself? What do you do for work, and what brings you here to practice English?`,
+    `Hi! Welcome! I'm Alex, and I'm so excited to practice English with you today! 🎉\n\nLet's dive right in — tell me, what's something interesting that happened to you recently? Or if you prefer, we could start with a specific topic you'd like to work on. What sounds good to you?`,
+  ];
+  const text = greetings[Math.floor(Math.random() * greetings.length)];
+
+  await new Promise(r => setTimeout(r, 1200));
+  hideTyping();
+
+  const parsed = { main: text, corrections: [], suggestions: [], newWords: [], pronunciations: [] };
+  const msg = { ...parsed, role: 'assistant', content: text, time: getTime() };
+  APP.messages.push(msg);
+  appendMessageToDOM(msg);
+
+  if (APP.settings.voice) speak(text);
+  APP.stats.conversations++;
+  saveUserData();
+}
+
+window.sendTextMessage = async function() {
+  const input = document.getElementById('chatInput');
+  const text = input.value.trim();
+  if (!text) return;
+  input.value = '';
+  autoResize(input);
+  await processUserMessage(text);
+};
+
+window.handleInputKey = function(e) {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    sendTextMessage();
+  }
+};
+
+async function processUserMessage(text) {
+  if (!text) return;
+
+  stopSpeaking();
+
+  const userMsg = { role: 'user', content: text, time: getTime() };
+  APP.messages.push(userMsg);
+  appendMessageToDOM(userMsg);
+
+  APP.stats.messages++;
+
+  showTyping();
+
+  let rawResponse;
+  try {
+    rawResponse = await callOpenAI(APP.messages.slice(-20));
+  } catch(e) {
+    console.warn('API error, using demo:', e.message);
+    rawResponse = null;
+  }
+
+  if (!rawResponse) {
+    rawResponse = getDemoResponse(text);
+  }
+
+  await new Promise(r => setTimeout(r, 400));
+  hideTyping();
+
+  const parsed = parseAIResponse(rawResponse);
+  const aiMsg = { ...parsed, role: 'assistant', content: rawResponse, time: getTime() };
+  APP.messages.push(aiMsg);
+  appendMessageToDOM(aiMsg);
+
+  // Add new words to vocab
+  if (parsed.newWords.length > 0) {
+    parsed.newWords.forEach(w => addWordToVocab(w.word, w.tr, w.example, 'new'));
+    showWordAddedPill();
+  }
+
+  // XP & stats
+  APP.stats.xp = (APP.stats.xp || 0) + 10;
+  updateStreak();
+
+  if (APP.settings.voice) speak(parsed.main);
+
+  saveUserData();
+  renderStats();
+}
+
+// ═══════════════════════════════════════════════
+//  TOPICS
+// ═══════════════════════════════════════════════
+window.openNewTopicModal = function() { openModal('newTopicModal'); };
+
+window.startTopic = async function(topic) {
+  closeModal('newTopicModal');
+  APP.currentTopic = topic;
+
+  const topicPrompts = {
+    business: "Let's talk about business and work! I'd love to know more about your professional life. What's your current role, and what kind of projects are you working on these days?",
+    daily: "Let's chat about everyday life! What's your typical day like? Do you have any routines or habits you really enjoy?",
+    travel: "Ooh, travel — one of my favorite topics! Have you been anywhere interesting recently, or is there a place you're dreaming of visiting?",
+    technology: "Tech talk! I love it. Are you into any particular technology or gadgets? What do you think about how AI is changing things?",
+    hobbies: "Let's talk about hobbies and what you do for fun! What do you enjoy doing when you're not working?",
+    health: "Health and wellness is such an important topic. Are you into any sports or fitness routines? How do you try to stay healthy?",
+    food: "Food and culture — always a delicious conversation! What's your favorite type of food, and do you enjoy cooking?",
+    current: "Let's discuss what's happening in the world! Is there any recent news or trend that's been catching your attention lately?",
+    random: null
+  };
+
+  if (topic === 'random') {
+    const topics = Object.keys(topicPrompts).filter(t => t !== 'random');
+    const pick = topics[Math.floor(Math.random() * topics.length)];
+    await startTopic(pick);
+    return;
+  }
+
+  const promptText = topicPrompts[topic];
+  if (!promptText) return;
+
+  showTyping();
+  await new Promise(r => setTimeout(r, 900));
+  hideTyping();
+
+  const msg = { role: 'assistant', content: promptText, main: promptText, corrections: [], suggestions: [], newWords: [], pronunciations: [], time: getTime() };
+  APP.messages.push(msg);
+  appendMessageToDOM(msg);
+  if (APP.settings.voice) speak(promptText);
+  saveUserData();
+};
+
+// ═══════════════════════════════════════════════
+//  SPEECH SYNTHESIS (TTS)
+// ═══════════════════════════════════════════════
+function speak(text) {
+  if (!APP.settings.voice || !text) return;
+  stopSpeaking();
+
+  const utter = new SpeechSynthesisUtterance(text);
+  utter.lang = APP.settings.accent || 'en-US';
+  utter.rate = parseFloat(APP.settings.speed) || 1.0;
+  utter.pitch = 1.05;
+
+  // Pick best voice
+  const voices = speechSynthesis.getVoices();
+  const langCode = APP.settings.accent || 'en-US';
+  const preferred = voices.filter(v => v.lang.startsWith(langCode.split('-')[0]) && !v.name.includes('Google'));
+  if (preferred.length > 0) utter.voice = preferred[0];
+  else {
+    const fallback = voices.find(v => v.lang.startsWith('en'));
+    if (fallback) utter.voice = fallback;
+  }
+
+  utter.onstart = () => {
+    APP.isSpeaking = true;
+    document.getElementById('aiSpeakingBar').classList.add('active');
+    document.getElementById('micBtn').className = 'mic-btn speaking';
+  };
+  utter.onend = utter.onerror = () => {
+    APP.isSpeaking = false;
+    document.getElementById('aiSpeakingBar').classList.remove('active');
+    document.getElementById('micBtn').className = 'mic-btn';
+    APP.currentUtterance = null;
+  };
+
+  APP.currentUtterance = utter;
+  APP.speechSynthesis.speak(utter);
+}
+
+window.stopSpeaking = function() {
+  APP.speechSynthesis.cancel();
+  APP.isSpeaking = false;
+  document.getElementById('aiSpeakingBar').classList.remove('active');
+  if (document.getElementById('micBtn')) {
+    document.getElementById('micBtn').className = 'mic-btn';
+  }
+};
+
+// ═══════════════════════════════════════════════
+//  SPEECH RECOGNITION (STT)
+// ═══════════════════════════════════════════════
+function initRecognition() {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) { showToast('Tarayıcınız ses tanımayı desteklemiyor'); return null; }
+
+  const rec = new SR();
+  rec.lang = 'en-US';
+  rec.continuous = false;
+  rec.interimResults = true;
+
+  rec.onresult = (e) => {
+    const interim = Array.from(e.results).map(r => r[0].transcript).join('');
+    document.getElementById('chatInput').value = interim;
+    autoResize(document.getElementById('chatInput'));
+
+    if (e.results[e.results.length - 1].isFinal) {
+      const final = e.results[e.results.length - 1][0].transcript;
+      stopRecording();
+      if (final.trim()) processUserMessage(final.trim());
+    }
+  };
+
+  rec.onerror = (e) => {
+    console.warn('Speech error:', e.error);
+    stopRecording();
+    if (e.error !== 'no-speech') showToast('Ses algılanamadı, tekrar deneyin');
+  };
+
+  rec.onend = () => { if (APP.isRecording) stopRecording(); };
+
+  return rec;
+}
+
+window.toggleMic = function() {
+  if (APP.isSpeaking) { stopSpeaking(); return; }
+  if (APP.isRecording) { stopRecording(); return; }
+  startRecording();
+};
+
+function startRecording() {
+  if (!APP.recognition) APP.recognition = initRecognition();
+  if (!APP.recognition) return;
+  stopSpeaking();
+  APP.isRecording = true;
+  document.getElementById('micBtn').className = 'mic-btn recording';
+  document.getElementById('headerStatus').textContent = '🎤 Dinleniyor...';
+  document.getElementById('chatInput').value = '';
+  try { APP.recognition.start(); } catch(e) {}
+}
+
+function stopRecording() {
+  APP.isRecording = false;
+  document.getElementById('micBtn').className = 'mic-btn';
+  document.getElementById('headerStatus').textContent = 'AI Tutor • Hazır';
+  try { if (APP.recognition) APP.recognition.stop(); } catch(e) {}
+}
+
+// ═══════════════════════════════════════════════
+//  VOCABULARY
+// ═══════════════════════════════════════════════
+function addWordToVocab(word, tr, example, status = 'new') {
+  const exists = APP.vocab.find(v => v.word.toLowerCase() === word.toLowerCase());
+  if (!exists) {
+    APP.vocab.unshift({
+      id: Date.now() + Math.random(),
+      word, tr,
+      example: example || '',
+      status,
+      addedAt: new Date().toISOString(),
+      usedInSentence: status === 'learned'
+    });
+    APP.stats.words = APP.vocab.filter(v => v.status === 'learned').length;
+    renderVocab();
+    renderStats();
+  } else if (exists.status === 'new') {
+    // Promote to practicing
+    exists.status = 'practicing';
+    renderVocab();
+  }
+}
+
+function renderVocab(filter = '') {
+  const list = document.getElementById('vocabList');
+  const filtered = filter
+    ? APP.vocab.filter(v => v.word.toLowerCase().includes(filter.toLowerCase()) || v.tr.toLowerCase().includes(filter.toLowerCase()))
+    : APP.vocab;
+
+  document.getElementById('vocabTotal').textContent = APP.vocab.length;
+  document.getElementById('vocabLearned').textContent = APP.vocab.filter(v => v.status === 'learned').length;
+  document.getElementById('vocabPracticing').textContent = APP.vocab.filter(v => v.status === 'practicing').length;
+
+  if (filtered.length === 0) {
+    list.innerHTML = `<div class="empty-vocab">
+      <div class="empty-icon">📚</div>
+      <p>Henüz kelime yok!<br>Konuşurken öğrendiğin kelimeler<br>burada listelenecek.</p>
+    </div>`;
+    return;
+  }
+
+  const emojis = ['📖','✨','🌟','💎','🎯','🔑','💡','🌈','⭐','🎓'];
+  list.innerHTML = filtered.map((v, i) => `
+    <div class="vocab-card">
+      <div class="vocab-emoji">${emojis[i % emojis.length]}</div>
+      <div class="vocab-info">
+        <div class="vocab-word">${escapeHtml(v.word)}</div>
+        <div class="vocab-tr">${escapeHtml(v.tr)}</div>
+        ${v.example ? `<div class="vocab-example">"${escapeHtml(v.example)}"</div>` : ''}
+      </div>
+      <span class="vocab-badge badge-${v.status}">${v.status === 'new' ? 'Yeni' : v.status === 'learned' ? 'Öğrenildi' : 'Pratik'}</span>
+      <button class="vocab-delete" onclick="deleteWord('${v.id}')">🗑️</button>
+    </div>
+  `).join('');
+}
+
+window.filterVocab = function(val) { renderVocab(val); };
+
+window.deleteWord = function(id) {
+  APP.vocab = APP.vocab.filter(v => String(v.id) !== String(id));
+  renderVocab();
+  saveUserData();
+};
+
+window.openAddWordModal = function() {
+  document.getElementById('newWordEn').value = '';
+  document.getElementById('newWordTr').value = '';
+  document.getElementById('newWordExample').value = '';
+  openModal('addWordModal');
+};
+
+window.addWordManually = function() {
+  const en = document.getElementById('newWordEn').value.trim();
+  const tr = document.getElementById('newWordTr').value.trim();
+  const ex = document.getElementById('newWordExample').value.trim();
+  if (!en || !tr) { showToast('Kelime ve Türkçe anlam gereklidir'); return; }
+  addWordToVocab(en, tr, ex, 'new');
+  closeModal('addWordModal');
+  showToast('Kelime eklendi ✓');
+  saveUserData();
+};
+
+// ═══════════════════════════════════════════════
+//  STATS & GAMIFICATION
+// ═══════════════════════════════════════════════
+function updateStreak() {
+  const today = new Date().toDateString();
+  if (APP.stats.lastDate !== today) {
+    const yesterday = new Date(Date.now() - 86400000).toDateString();
+    if (APP.stats.lastDate === yesterday) {
+      APP.stats.streak = (APP.stats.streak || 0) + 1;
+    } else if (APP.stats.lastDate !== today) {
+      APP.stats.streak = 1;
+    }
+    APP.stats.lastDate = today;
+  }
+}
+
+function renderStats() {
+  document.getElementById('statConversations').textContent = APP.stats.conversations || 0;
+  document.getElementById('statMessages').textContent = APP.stats.messages || 0;
+  document.getElementById('statWords').textContent = APP.vocab.length;
+  const mins = Math.floor((Date.now() - APP.sessionStart) / 60000);
+  document.getElementById('statTime').textContent = (APP.stats.time || 0) + mins + ' dk';
+  document.getElementById('streakNum').textContent = APP.stats.streak || 0;
+  document.getElementById('levelCurrent').textContent = APP.profile?.level || 'B1';
+  const xp = APP.stats.xp || 0;
+  const xpForNext = 200;
+  document.getElementById('levelXP').textContent = `${xp % xpForNext} / ${xpForNext} XP`;
+  document.getElementById('levelBarFill').style.width = `${((xp % xpForNext) / xpForNext) * 100}%`;
+}
+
+const ACHIEVEMENTS = [
+  { id:'first_chat', icon:'🎉', name:'İlk Sohbet', condition: s => s.messages >= 1 },
+  { id:'word_10', icon:'📚', name:'10 Kelime', condition: (s, v) => v.length >= 10 },
+  { id:'streak_3', icon:'🔥', name:'3 Gün Seri', condition: s => (s.streak||0) >= 3 },
+  { id:'msg_50', icon:'💬', name:'50 Mesaj', condition: s => s.messages >= 50 },
+  { id:'word_50', icon:'🎓', name:'50 Kelime', condition: (s, v) => v.length >= 50 },
+  { id:'streak_7', icon:'⚡', name:'7 Gün Seri', condition: s => (s.streak||0) >= 7 },
+  { id:'msg_100', icon:'🏆', name:'100 Mesaj', condition: s => s.messages >= 100 },
+  { id:'streak_30', icon:'👑', name:'30 Gün Seri', condition: s => (s.streak||0) >= 30 },
+  { id:'word_100', icon:'🌟', name:'100 Kelime', condition: (s, v) => v.length >= 100 },
+];
+
+function renderAchievements() {
+  const grid = document.getElementById('achievementGrid');
+  grid.innerHTML = ACHIEVEMENTS.map(a => {
+    const unlocked = a.condition(APP.stats, APP.vocab);
+    return `<div class="achievement ${unlocked ? 'unlocked' : ''}">
+      <div class="achievement-icon">${a.icon}</div>
+      <div class="achievement-name">${a.name}</div>
+    </div>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════════
+//  UI HELPERS
+// ═══════════════════════════════════════════════
+let typingEl = null;
+function showTyping() {
+  const container = document.getElementById('conversationView');
+  if (typingEl) return;
+  typingEl = document.createElement('div');
+  typingEl.className = 'typing-indicator';
+  typingEl.innerHTML = '<div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div>';
+  container.appendChild(typingEl);
+  scrollToBottom();
+}
+function hideTyping() {
+  if (typingEl) { typingEl.remove(); typingEl = null; }
+}
+
+window.switchTab = function(tab, el) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById(tab + 'Panel').classList.add('active');
+  if (tab === 'vocab') renderVocab(document.getElementById('vocabSearch').value);
+  if (tab === 'progress') { renderStats(); renderAchievements(); }
+};
+
+window.openModal = function(id) { document.getElementById(id).classList.add('active'); };
+window.closeModal = function(id) { document.getElementById(id).classList.remove('active'); };
+
+// Close modal on overlay click
+document.querySelectorAll('.modal-overlay').forEach(overlay => {
+  overlay.addEventListener('click', e => {
+    if (e.target === overlay) overlay.classList.remove('active');
+  });
+});
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+function showWordAddedPill() {
+  const p = document.getElementById('wordAddedPill');
+  p.classList.add('show');
+  setTimeout(() => p.classList.remove('show'), 2000);
+}
+
+window.autoResize = function(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 100) + 'px';
+};
+
+function escapeHtml(str) {
+  if (!str) return '';
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/\n/g,'<br>');
+}
+
+// Voices load async on some browsers
+if (speechSynthesis.onvoiceschanged !== undefined) {
+  speechSynthesis.onvoiceschanged = () => {};
+}
+
+// Enter key on login
+document.getElementById('loginPass').addEventListener('keydown', e => {
+  if (e.key === 'Enter') handleLogin();
+});
+
+</script>
+</body>
+</html>
